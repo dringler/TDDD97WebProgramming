@@ -56,4 +56,23 @@ function checkPassword() {
 		// window.alert('Something went wrong. Please try again.');
 	}
 };
+function submitSignUp() {
+	var dataObject = {};
+	dataObject.email = document.getElementById('signUpEmail').value;
+	dataObject.password = document.getElementById('signUpPassword').value;
+	dataObject.firstname = document.getElementById('signUpFirstName').value;
+	dataObject.familyname = document.getElementById('signUpLastName').value;
+	dataObject.gender = document.getElementById('signUpGender').value;
+	dataObject.city = document.getElementById('signUpCity').value;
+	dataObject.country = document.getElementById('signUpCountry').value;
 
+
+	var returnObject = serverstub.signUp(dataObject);
+
+	if (returnObject.success == true) {
+		window.alert('Sign-up successful.');
+		displayView(profile);
+	} else {
+		window.alert(returnObject.message);
+	}
+};
