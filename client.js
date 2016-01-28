@@ -1,9 +1,17 @@
-displayView = function(){
+var welcome;
+var profile;
+
+displayView = function(view){
 	// the code required to display a view
+	document.getElementById("body").innerHTML = view.innerHTML;
+
 };
 
 window.onload = function(){
-	//code that is executed as the page is loaded. 
-	//You shall put your own custom code here. 
-	window.alert("Hello TDDD97!");
+	welcome = document.getElementById("welcomeview");
+	profile = document.getElementById("profileview");
+
+//change later: check if user is already signed in
+	displayView(welcome);
+
 };
