@@ -28,7 +28,7 @@
 					<form>
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" required></input>
+							<input type="email" name="usernameInput" id="signUpEmail" onchange="return checkInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
@@ -40,15 +40,15 @@
 						</p>
 						<p>
 							<label for="firstName"> First Name: </label>
-							<input type="text" name="firstnameInput" required></input>
+							<input type="text" name="firstnameInput" id="signUpFirstName" onchange="return checkInput();" required></input>
 						</p>
 						<p>
 							<label for="lastName"> Last Name: </label>
-							<input type="text" name="lastnameInput" required></input>
+							<input type="text" name="lastnameInput" id="signUpLastName" onchange="return checkInput();" required></input>
 						</p>
 						<p>
 							<label for="gender"> Gender: </label>
-								<select>
+								<select id="signUpGender">
 								  <option value="male">Male</option>
 								  <option value="female">Female</option>
 								</select>
@@ -56,15 +56,15 @@
 						</p>
 						<p>
 							<label for="city"> City: </label>
-							<input type="text" name="lastnameInput" required></input>
+							<input type="text" name="lastnameInput" id="signUpCity" onchange="return checkInput();" required></input>
 						</p>
 						<p>
 							<label for="country"> Country: </label>
-							<input type="text" name="lastnameInput" required></input>
+							<input type="text" name="lastnameInput" id="signUpCountry" onchange="return checkInput();" required></input>
 						</p>
 						
 						<p class="signupButton"> 
-							<input type="submit" id="signUpButtonID" value="Sign Up" disabled/> 
+							<input type="submit" id="signUpButtonID" value="Sign Up" onclick="submitSignUp();" disabled/> 
 						</p>
 					</form>
 

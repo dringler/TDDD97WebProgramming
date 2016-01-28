@@ -1,5 +1,6 @@
 var welcome;
 var profile;
+var missingValues;
 
 displayView = function(view){
 	// the code required to display a view
@@ -13,6 +14,25 @@ window.onload = function(){
 
 //change later: check if user is already signed in
 	displayView(welcome);
+
+};
+
+function checkInput() {
+	var suEmail = document.getElementById('signUpEmail').value;
+	var suPassword = document.getElementById('signUpPassword').value;
+	var suFirstName = document.getElementById('signUpFirstName').value;
+	var suLastName = document.getElementById('signUpLastName').value;
+	var suGender = document.getElementById('signUpGender').value;
+	var suCity = document.getElementById('signUpCity').value;
+	var suCountry = document.getElementById('signUpCountry').value;
+
+	if (suEmail != "" && suPassword != "" && suFirstName != "" && suLastName != "" && suCity != "" && suCountry != "") {
+		missingValues = false;
+		document.getElementById('signUpButtonID').disabled = false;
+	} else {
+		missingValues = true;
+		document.getElementById('signUpButtonID').disabled = true;
+	}
 
 };
 
