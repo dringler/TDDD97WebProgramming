@@ -12,14 +12,14 @@
 					<form>
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" required></input>
+							<input type="email" name="usernameInput" id="loginEmail" onchange="return checkLoginInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" required></input>
+							<input type="password" name="passwordInput" id="loginPassword" onchange="return checkLoginInput();" required></input>
 						</p>
 						<p class="loginButton"> 
-							<input type="submit" value="Login" /> 
+							<input type="submit" value="Login" id="loginButtonID" onclick="return submitLogin();" disabled /> 
 						</p>
 					</form>
 
@@ -28,23 +28,23 @@
 					<form>
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" id="signUpEmail" onchange="return checkInput();" required></input>
+							<input type="email" name="usernameInput" id="signUpEmail" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="signUpPassword" onchange="checkPassword(); return checkInput();" required></input>
+							<input type="password" name="passwordInput" id="signUpPassword" onchange="checkPassword(); return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="repeatPassword"> Repeat PSW: </label>
-							<input type="password" name="repeatPasswordInput" id="confirmSignUpPassword"onchange="checkPassword(); return checkInput()" required></input>
+							<input type="password" name="repeatPasswordInput" id="confirmSignUpPassword"onchange="checkPassword(); return checkSuInput()" required></input>
 						</p>
 						<p>
 							<label for="firstName"> First Name: </label>
-							<input type="text" name="firstnameInput" id="signUpFirstName" onchange="return checkInput();" required></input>
+							<input type="text" name="firstnameInput" id="signUpFirstName" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="lastName"> Last Name: </label>
-							<input type="text" name="lastnameInput" id="signUpLastName" onchange="return checkInput();" required></input>
+							<input type="text" name="lastnameInput" id="signUpLastName" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="gender"> Gender: </label>
@@ -56,11 +56,11 @@
 						</p>
 						<p>
 							<label for="city"> City: </label>
-							<input type="text" name="lastnameInput" id="signUpCity" onchange="return checkInput();" required></input>
+							<input type="text" name="lastnameInput" id="signUpCity" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="country"> Country: </label>
-							<input type="text" name="lastnameInput" id="signUpCountry" onchange="return checkInput();" required></input>
+							<input type="text" name="lastnameInput" id="signUpCountry" onchange="return checkSuInput();" required></input>
 						</p>
 						
 						<p class="signupButton"> 

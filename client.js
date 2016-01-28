@@ -1,6 +1,7 @@
 var welcome;
 var profile;
-var missingValues;
+var loginObject;
+var token;
 
 displayView = function(view){
 	// the code required to display a view
@@ -13,11 +14,40 @@ window.onload = function(){
 	profile = document.getElementById("profileview");
 
 //change later: check if user is already signed in
-	displayView(welcome);
+	token = localStorage.getItem("token");
+	if (token != "") {
+		displayView(profile);
+	} else {
+		displayView(welcome);	
+	}
 
 };
 
-function checkInput() {
+function checkLoginInput() {
+	var loginEmail = document.getElementById('loginEmail').value;
+	var loginPassword = document.getElementById('loginPassword').value;
+
+	if (loginEmail != "" && loginPassword != "") {
+		document.getElementById('loginButtonID').disabled = false;
+	} else {
+		document.getElementById('loginButtonID').disabled = true;
+	}
+
+};
+
+function submitLogin() {
+	var username = document.getElementById('loginEmail').value;
+	var password = document.getElementById('loginPassword').value;
+	loginObject = serverstub.signIn(username, password);
+	if (loginObject.success == true) {
+		localStorage.setItem("token", loginObject.data);
+		displayView(profile);
+	} else {
+		window.alert(loginObject.message);
+	}
+}
+
+function checkSuInput() {
 	var suEmail = document.getElementById('signUpEmail').value;
 	var suPassword = document.getElementById('signUpPassword').value;
 	var suFirstName = document.getElementById('signUpFirstName').value;
@@ -27,10 +57,8 @@ function checkInput() {
 	var suCountry = document.getElementById('signUpCountry').value;
 
 	if (suEmail != "" && suPassword != "" && suFirstName != "" && suLastName != "" && suCity != "" && suCountry != "") {
-		missingValues = false;
 		document.getElementById('signUpButtonID').disabled = false;
 	} else {
-		missingValues = true;
 		document.getElementById('signUpButtonID').disabled = true;
 	}
 
@@ -74,7 +102,6 @@ function submitSignUp() {
 		displayView(profile);
 	} else {
 		window.alert(returnObject.message);
-		missingValues = true;
 		document.getElementById('signUpButtonID').disabled = true;
 	}
 };
