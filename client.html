@@ -32,11 +32,11 @@
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="signUpPassword" onchange="checkPassword();" required></input>
+							<input type="password" name="passwordInput" id="signUpPassword" onchange="checkPassword(); return checkInput();" required></input>
 						</p>
 						<p>
 							<label for="repeatPassword"> Repeat PSW: </label>
-							<input type="password" name="repeatPasswordInput" id="confirmSignUpPassword"onchange="checkPassword();" required></input>
+							<input type="password" name="repeatPasswordInput" id="confirmSignUpPassword"onchange="checkPassword(); return checkInput()" required></input>
 						</p>
 						<p>
 							<label for="firstName"> First Name: </label>

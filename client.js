@@ -74,5 +74,7 @@ function submitSignUp() {
 		displayView(profile);
 	} else {
 		window.alert(returnObject.message);
+		missingValues = true;
+		document.getElementById('signUpButtonID').disabled = true;
 	}
 };
