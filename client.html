@@ -27,7 +27,6 @@
 							<input type="submit" value="Login" id="loginButtonID" onclick="return submitLogin();" disabled /> 
 						</p>
 					</form>
-
 				</div>
 				<div id="signup"> Sign Up
 					<form>
@@ -37,11 +36,11 @@
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="signUpPassword" onchange="checkPassword(); return checkSuInput();" required></input>
+							<input type="password" name="passwordInput" id="signUpPassword" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="repeatPassword"> Repeat PSW: </label>
-							<input type="password" name="repeatPasswordInput" id="confirmSignUpPassword"onchange="checkPassword(); return checkSuInput()" required></input>
+							<input type="password" name="repeatPasswordInput" id="confirmSignUpPassword" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="firstName"> First Name: </label>
@@ -94,7 +93,30 @@
 			  </div>
 			  <div id="account" class="tab-pane fade">
 			    <h3>Account</h3>
-			    <p>Account content.</p>
+			    <div>
+			    	<button id="signOutButton" onclick="signOut()">Sign out</button>
+			    </div>
+			    <div>
+			    	<button id="changePasswordButton" onclick="showChangePassword()">Change password</button>
+			    </div>
+			    <div id="changePwForm" style="display: none;">
+			    	<form>
+						<p>
+							<label for="oldPassword"> Old password: </label>
+							<input type="password" name="oldPasswordChange" id="oldPasswordChangeID" onchange="return checkPwChangeInput();" required></input>
+						</p>
+						<p>
+							<label for="newPassword"> New password: </label>
+							<input type="password" name="newPasswordChange" id="newPasswordChangeID" onchange="return checkPwChangeInput();" required></input>
+						</p>
+						<p>	
+							<label for="newPassword2"> Repeat new password: </label>
+							<input type="password" name="newPasswordChange2" id="newPasswordChange2ID" onchange="return checkPwChangeInput();" required></input>
+						</p>
+						<p class="changePasswordSubmit"> 
+							<input type="submit" id="changePasswordSubmitButton" value="Submit" onclick="return changePasswordSubmit()" disabled/> 
+						</p>
+			    </div>
 			  </div>
 			</div>
 		</script>

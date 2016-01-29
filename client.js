@@ -2,6 +2,8 @@ var welcome;
 var profile;
 var loginObject;
 var token;
+var minPwLength = 5;
+
 
 displayView = function(view){
 	// the code required to display a view
@@ -50,40 +52,25 @@ function submitLogin() {
 function checkSuInput() {
 	var suEmail = document.getElementById('signUpEmail').value;
 	var suPassword = document.getElementById('signUpPassword').value;
+	var suPassword2 = document.getElementById('confirmSignUpPassword').value;
 	var suFirstName = document.getElementById('signUpFirstName').value;
 	var suLastName = document.getElementById('signUpLastName').value;
 	var suGender = document.getElementById('signUpGender').value;
 	var suCity = document.getElementById('signUpCity').value;
 	var suCountry = document.getElementById('signUpCountry').value;
 
-	if (suEmail != "" && suPassword != "" && suFirstName != "" && suLastName != "" && suCity != "" && suCountry != "") {
-		document.getElementById('signUpButtonID').disabled = false;
+	if (suEmail != "" && suPassword != "" && suPassword2 != "" && suFirstName != "" && suLastName != "" && suCity != "" && suCountry != "") {
+		if(suPassword == suPassword2 && suPassword.length >= minPwLength ) {
+			document.getElementById('signUpButtonID').disabled = false;
+		} else {
+		document.getElementById('signUpButtonID').disabled = true;
+	}
 	} else {
 		document.getElementById('signUpButtonID').disabled = true;
 	}
 
 };
 
-function checkPassword() {
-	var first = document.getElementById('signUpPassword').value;
-	var second = document.getElementById('confirmSignUpPassword').value;
-	var minPwLength = 5;
-	
-	if(first == second &&
-		first.length >= minPwLength ) {
-		document.getElementById('signUpButtonID').disabled = false;
-		//window.alert('Form has been submitted.');
-	} else if (first != second) {
-		document.getElementById('signUpButtonID').disabled = true;
-		// window.alert('Passwords do not match.');
-	} else if (first.length < minPwLength || second.length < minPwLength) {
-		document.getElementById('signUpButtonID').disabled = true;
-		// window.alert('Password must be at least ' + minPwLength + " characters long.");
-	} else {
-		document.getElementById('signUpButtonID').disabled = true;
-		// window.alert('Something went wrong. Please try again.');
-	}
-};
 function submitSignUp() {
 	var dataObject = {};
 	dataObject.email = document.getElementById('signUpEmail').value;
@@ -103,5 +90,52 @@ function submitSignUp() {
 	} else {
 		window.alert(returnObject.message);
 		document.getElementById('signUpButtonID').disabled = true;
+	}
+};
+
+function signOut() {
+	serverstub.signOut(token);
+	localStorage.setItem("token", "");
+	displayView(welcome);
+};
+
+function checkPwChangeInput() {
+	var oldPW = document.getElementById('oldPasswordChangeID').value;
+	var newPW = document.getElementById('newPasswordChangeID').value;
+	var newPW2 = document.getElementById('newPasswordChange2ID').value;
+
+	if (oldPW != "" && newPW != "" && newPW2 != "") {
+		if(newPW == newPW2 && newPW.length >= minPwLength ) {
+			document.getElementById('changePasswordSubmitButton').disabled = false;
+		}  else {
+		document.getElementById('changePasswordSubmitButton').disabled = true;
+	}
+	} else {
+		document.getElementById('changePasswordSubmitButton').disabled = true;
+	}
+};
+
+
+function showChangePassword() {
+	var changePwForm = document.getElementById('changePwForm');
+	if (changePwForm.style.display != "none") {
+		changePwForm.style.display = "none";
+	} else {
+		changePwForm.style.display = "block";
+	}
+
+};
+
+function changePasswordSubmit() {
+	var oldPW = document.getElementById('oldPasswordChangeID').value;
+	var newPW = document.getElementById('newPasswordChangeID').value;
+	token = localStorage.getItem("token");
+	
+	var returnObject = serverstub.changePassword(token, oldPW, newPW);
+
+	if (returnObject.success == true) {
+		window.alert('Password changed.');
+	} else {
+		window.alert(returnObject.message);
 	}
 };
