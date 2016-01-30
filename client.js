@@ -19,6 +19,9 @@ window.onload = function(){
 	token = localStorage.getItem("token");
 	if (token != "") {
 		displayView(profile);
+		getUserData();
+		getUserMessages();
+
 	} else {
 		displayView(welcome);	
 	}
@@ -44,6 +47,8 @@ function submitLogin() {
 	if (loginObject.success == true) {
 		localStorage.setItem("token", loginObject.data);
 		displayView(profile);
+		getUserData();
+		getUserMessages();
 	} else {
 		window.alert(loginObject.message);
 	}
@@ -87,6 +92,8 @@ function submitSignUp() {
 	if (returnObject.success == true) {
 		window.alert('Sign-up successful.');
 		displayView(profile);
+		getUserDate();
+		getUserMessages();
 	} else {
 		window.alert(returnObject.message);
 		document.getElementById('signUpButtonID').disabled = true;
@@ -138,4 +145,44 @@ function changePasswordSubmit() {
 	} else {
 		window.alert(returnObject.message);
 	}
+};
+
+function getUserData() {
+		token = localStorage.getItem("token");
+		var returnObject = serverstub.getUserDataByToken(token);
+
+		document.getElementById('mdUsername').innerHTML = returnObject.data.email;
+		document.getElementById('mdFirstName').innerHTML  = returnObject.data.firstname;
+		document.getElementById('mdLastName').innerHTML = returnObject.data.familyname;
+		document.getElementById('mdGender').innerHTML = returnObject.data.gender;
+		document.getElementById('mdCity').innerHTML = returnObject.data.city;
+		document.getElementById('mdCountry').innerHTML = returnObject.data.country;		
+};
+
+function getUserMessages() {
+	token = localStorage.getItem("token");
+	var returnObject = serverstub.getUserMessagesByToken(token);
+	var userMessagesArray = returnObject.data;
+	var userMessages = [];
+	if (userMessagesArray.length>0) {
+		for (i=0; i<userMessagesArray.length; i++) {
+			userMessages = userMessages + "<p>" + userMessagesArray[i].content + "(by " + userMessagesArray[i].writer + ")</p>";
+		}
+
+		document.getElementById('wall').innerHTML = userMessages;
+	}
+};
+
+function postButton() {
+	token = localStorage.getItem("token");
+	var message = document.getElementById('postarea').value;
+	var returnObject = serverstub.getUserDataByToken(token);
+	var email = returnObject.data.email;
+
+	serverstub.postMessage(token, message, email);
+	document.getElementById('postarea').value = "";
+};
+
+function refreshWall() {
+	getUserMessages();
 };
