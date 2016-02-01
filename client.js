@@ -172,6 +172,20 @@ function getUserMessages() {
 		document.getElementById('wall').innerHTML = userMessages;
 	}
 };
+function getUserMessagesByMail(mail) {
+	var email = mail;
+	token = localStorage.getItem("token");
+	var returnObject = serverstub.getUserMessagesByEmail(token, email);
+	var userMessagesArray = returnObject.data;
+	var userMessages = [];
+	if (userMessagesArray.length>0) {
+		for (i=0; i<userMessagesArray.length; i++) {
+			userMessages = userMessages + "<p>" + userMessagesArray[i].content + "(by " + userMessagesArray[i].writer + ")</p>";
+		}
+
+		document.getElementById('oWall').innerHTML = userMessages;
+	}
+};
 
 function postButton() {
 	token = localStorage.getItem("token");
@@ -186,3 +200,50 @@ function postButton() {
 function refreshWall() {
 	getUserMessages();
 };
+
+function postButtonBrowse() {
+	token = localStorage.getItem("token");
+	var message = document.getElementById('postareaBrowse').value;
+	var returnObject = serverstub.getUserDataByToken(token);
+	var email = document.getElementById('searchUserID').value;
+
+	serverstub.postMessage(token, message, email);
+	document.getElementById('postareaBrowse').value = "";
+};
+
+function refreshWallBrowse() {
+	getUserMessagesByMail(document.getElementById('searchUserID').value);
+};
+
+
+
+function searchUser() {
+	// localStorage.setItem('lastTab', 
+	
+	token = localStorage.getItem("token");
+	var email = document.getElementById('searchUserID').value;
+
+	var returnObject = serverstub.getUserDataByEmail(token,email);
+
+	if (returnObject.success == true) {
+		document.getElementById('userWall').style.display = "block";
+
+		document.getElementById('userWallHeader').innerHTML = "Wall of " + returnObject.data.email;
+
+		document.getElementById('oUsername').innerHTML = returnObject.data.email;
+		document.getElementById('oFirstName').innerHTML  = returnObject.data.firstname;
+		document.getElementById('oLastName').innerHTML = returnObject.data.familyname;
+		document.getElementById('oGender').innerHTML = returnObject.data.gender;
+		document.getElementById('oCity').innerHTML = returnObject.data.city;
+		document.getElementById('oCountry').innerHTML = returnObject.data.country;	
+
+		getUserMessagesByMail(returnObject.data.email);
+
+
+	} else {
+		document.getElementById('userWall').style.display = "none";
+		window.alert(returnObject.message);
+	}
+};
+
+

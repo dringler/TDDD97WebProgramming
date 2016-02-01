@@ -77,14 +77,13 @@
 		</script>
 		<script id="profileview" type=”text/view”>
 			<ul class="nav nav-tabs">
-			  <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-			  <li><a data-toggle="tab" href="#browse">Browse</a></li>
-			  <li><a data-toggle="tab" href="#account">Account</a></li>
+			  <li class="active" id="hometab"><a data-toggle="tab" href="#home">Home</a></li>
+			  <li id="browsetab"><a data-toggle="tab" href="#browse">Browse</a></li>
+			  <li id="accounttab"><a data-toggle="tab" href="#account">Account</a></li>
 			</ul>
 
 			<div class="tab-content">
 			  <div id="home" class="tab-pane fade in active">
-			    <p></p>
 			    <div id="post">
 					<textarea id="postarea" rows="5" cols="100"> </textarea>
 					<button id="homePostButton" onclick="return postButton();">Post message</button>
@@ -105,11 +104,49 @@
 			    	<div> City: <p id="mdCity"> </p></div>
 			    	<div> Country: <p id="mdCountry"> </p></div>
 			    </div>
+			 </div>
+
+
+			 <div id="browse" class="tab-pane fade">			 
+			  	<form role="form">
+					<div class="form-group">
+					 <label for="email">Search user:</label>
+					    <input type="email" class="form-control" id="searchUserID" name="userSearch" required>
+					  </div>
+					 <button type="button" class="btn btn-default"id="searchUserButtonID" onclick="return searchUser()">Search</button>	
+			  	</form>
+
+			    
+			  
+			  	<div id="userWall" style="display: none;">
+			  		<h4 id="userWallHeader"></h4>
+
+			  		<div id="post">
+					<textarea id="postareaBrowse" rows="5" cols="100"> </textarea>
+					<button id="postBrowseButton" onclick="return postButtonBrowse();">Post message</button>
+			    </div>
+			    <div id="wallheader">
+			    	<h4>My messages</h4>
+			    	<button id="reloadWallBrowseButton" onclick="return refreshWallBrowse();">Reload</button></br>
+			    	<div id="oWall">
+
+			    	</div>
+			    </div>
+			    <div id="userdata">
+			    	<h4>Userdata</h4>
+			    	<div> Username: <p id="oUsername"> </p></div>
+			    	<div> First Name: <p id="oFirstName"> </p></div>
+			    	<div> Last Name: <p id="oLastName"> </p></div>
+			    	<div> Gender: <p id="oGender"> </p></div>
+			    	<div> City: <p id="oCity"> </p></div>
+			    	<div> Country: <p id="oCountry"> </p></div>
+			    </div>
+
+			 	 </div>
+
 			  </div>
-			  <div id="browse" class="tab-pane fade">
-			    <h3>Browse</h3>
-			    <p>Browse content.</p>
-			  </div>
+
+
 			  <div id="account" class="tab-pane fade">
 			    <p></p>
 			    <div>
