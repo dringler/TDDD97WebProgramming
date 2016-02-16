@@ -271,6 +271,7 @@ function searchUser() {
 
 	if (returnObject.success == true) {
 		document.getElementById('userWall').style.display = "block";
+		document.getElementById('searchUserFail').style.display = "none";
 
 		document.getElementById('userWallHeader').innerHTML = "Wall of " + returnObject.data.email;
 
@@ -286,7 +287,8 @@ function searchUser() {
 
 	} else {
 		document.getElementById('userWall').style.display = "none";
-		window.alert(returnObject.message);
+		document.getElementById('searchUserFail').style.display = "block";
+		// window.alert(returnObject.message);
 	}
 };
 
