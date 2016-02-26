@@ -17,11 +17,11 @@
 					<form>
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" id="loginEmail" onchange="return checkLoginInput();" required></input>
+							<input type="email" name="loginUsernameInput" id="loginEmail" onchange="return checkLoginInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="loginPassword" onchange="return checkLoginInput();" required></input>
+							<input type="password" name="loginPasswordInput" id="loginPassword" onchange="return checkLoginInput();" required></input>
 						</p>
 						<p id="wrongLoginText" style="display:none;">
 							Wrong input. Please try again.
@@ -35,11 +35,11 @@
 					<form>
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" id="signUpEmail" onchange="return checkSuInput();" required></input>
+							<input type="email" name="signupUsernameInput" id="signUpEmail" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="signUpPassword" onchange="return checkSuInput();" required></input>
+							<input type="password" name="signupPasswordInput" id="signUpPassword" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="repeatPassword"> Repeat PSW: </label>
@@ -47,15 +47,15 @@
 						</p>
 						<p>
 							<label for="firstName"> First Name: </label>
-							<input type="text" name="firstnameInput" id="signUpFirstName" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupFirstnameInput" id="signUpFirstName" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="lastName"> Last Name: </label>
-							<input type="text" name="lastnameInput" id="signUpLastName" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupLastnameInput" id="signUpLastName" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="gender"> Gender: </label>
-								<select id="signUpGender">
+								<select name ="signupGenderInput" id="signUpGender">
 								  <option value="male">Male</option>
 								  <option value="female">Female</option>
 								</select>
@@ -63,11 +63,11 @@
 						</p>
 						<p>
 							<label for="city"> City: </label>
-							<input type="text" name="lastnameInput" id="signUpCity" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupCityInput" id="signUpCity" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="country"> Country: </label>
-							<input type="text" name="lastnameInput" id="signUpCountry" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupCountryInput" id="signUpCountry" onchange="return checkSuInput();" required></input>
 						</p>
 						<p id="pwNotMatch" style="display:none;">
 							Passwords do not match. Minimum password length is 5.

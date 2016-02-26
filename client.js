@@ -1,3 +1,5 @@
+import server
+
 var welcome;
 var profile;
 var loginObject;

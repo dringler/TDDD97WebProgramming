@@ -1,0 +1,47 @@
+__author__ = 'Daniel Ringler'
+#imports
+import sqlite3
+from flask import g
+from contextlib import closing
+
+#configuration
+DATABASE = '/Users/curtis/git/TDDD97WebProgramming/server/database.db'
+DEBUG = True
+SECRET_KEY = 'development key'
+USERNAME = 'admin'
+PASSWORD = 'default'
+
+#database conncetion
+def connect_db():
+	conn = sqlite3.connect(DATABASE)
+	return conn
+
+#get database
+def get_db():
+	db = getattr(g, '_database', None)
+	if db is None:
+		db = g._database = connect_db()
+	return db
+
+#query database
+def query_db(query, args=(), one=False):
+	db = get_db()
+	cur = db.execute(query, args)
+	rv = cur.fetchall()
+	cur.close()
+	db.commit()
+	return (rv[0] if rv else None) if one else rv
+
+def get_user(email, password):
+	userInfo = query_db('select email,passwordHash,salt from users where email=?', [email], one=True)
+	return userInfo
+
+def insert_user(email, hashedPassword, salt, firstName, familyName, gender, city, country):
+	query_db('INSERT INTO users (email,passwordHash,salt,firstName,familyName,gender,city,country) VALUES (?,?,?,?,?,?,?,?)', [email, hashedPassword, salt, firstName, familyName, gender, city, country])
+
+def user_exists(email):
+	if (query_db('select email from users where email=?', [email], one=True) != None):
+		return True
+	else:
+		return False
+
