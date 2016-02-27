@@ -12,6 +12,8 @@ app.debug = True
 active_users = {}
 
 #################################################
+# HELPER FUNCTIONS
+#################################################
 
 #hash password
 def hashPw(password):
@@ -36,6 +38,25 @@ def create_token():
 def get_email_by_token(token):
     return active_users[token]
 
+#get user data
+def get_user_data(token, email):
+    if token in active_users:
+        userInfo = database_helper.get_user_info_by_mail(email) #email,fistName,familyName,gender,city,country
+        jsonString = {'email': userInfo[0], 'firstname': userInfo[1], 'familyname': userInfo[2], 'gender': userInfo[3], 'city': userInfo[4], 'country': userInfo[5]}
+        return json.dumps({"success": "true", "message": "User data returned.", "data": jsonString })
+    else:
+        return json.dumps({"success": "false", "message": "User is not signed in."}) 
+
+#get user messages
+def get_user_messages(token, email):
+    if token in active_users:
+        userMessages = database_helper.get_user_messages_by_email(email) #toUser, fromUser, messageContent
+        keys = ['toUser', 'fromUser','messageContent']
+        jsonString = dict(zip(keys, zip(*userMessages)))
+        return json.dumps({"success": "true", "message": "User messages returned.", "data": jsonString })
+    else:
+        return json.dumps({"success": "false", "message": "User is not signed in."}) 
+
 #################################################
 
 @app.before_request
@@ -55,11 +76,11 @@ def hello():
     return 'Hello World!'
 
 @app.route('/sign_in')
-def sign_in():
+def sign_in(): #email, password
     email = request.form['loginUsernameInput']
     password = request.form['loginPasswordInput']
     #query user db
-    userInfo = database_helper.getUser(email, password) #userInfo[0] = email, userInfo[1] = pw, userInfo[2] = salt
+    userInfo = database_helper.get_user_mail_pw(email, password) #userInfo[0] = email, userInfo[1] = pw, userInfo[2] = salt
 
     #check is user is found in db
     if userInfo != None:
@@ -77,7 +98,7 @@ def sign_in():
         return json.dumps({"success": "false", "message": "Username not found."})        
 
 @app.route('/sign_up')
-def sign_up():
+def sign_up(): #email, password, firstname, familyname, gender, city, country
     email = request.form['signupUsernameInput']
     password = request.form['signupPasswordInput']
     firstName = request.form['signupFirstnameInput']
@@ -102,7 +123,7 @@ def sign_up():
         return json.dumps({"success": "false", "message": "User already exists."})  
 
 @app.route('/sign_out')
-def sign_out():
+def sign_out(): #token
     token = request.headers.get('token')
     #delete token/email from active users
     if token in active_users:
@@ -113,13 +134,13 @@ def sign_out():
 
 
 @app.route('/change_password')
-def change_password(token, old_password, new_password):
+def change_password(): #token, old_password, new_password
     token = request.headers.get('token')
     email = get_email_by_token(token)
     oldPW = request.form['oldPasswordChange']
     newPW = request.form['newPasswordChange']
 
-    userInfo = database_helper.get_user(email, oldPW)
+    userInfo = database_helper.get_user_mail_pw(email, oldPW)
     if userInfo != None: #userInfo[0] = email, userInfo[1] = pw, userInfo[2] = salt
         oldHashedPW, oldSalt = hashPW(oldPW)
         #check old PW
@@ -134,28 +155,44 @@ def change_password(token, old_password, new_password):
         return json.dumps({"success": "false", "message": "No user found."}) 
 
 @app.route('/get_user_data_by_token')
-def get_user_data_by_token(token):
-    return 'get_user_data_by_token'
-
+def get_user_data_by_token(): #token
+    token = request.headers.get('token')
+    email = get_email_by_token(token)
+    return get_user_data(token, email)
+    
 @app.route('/get_user_data_by_email')
-def get_user_data_by_email(token, email):
-    return 'get_user_data_by_email'
+def get_user_data_by_email(): #token, email
+    token = request.headers.get('token')
+    email = request.headers.get('email')
+    return get_user_data(token, email)  
 
 @app.route('/get_user_messages_by_token')
-def get_user_messages_by_token(token):
-    return 'get_user_messages_by_token'
+def get_user_messages_by_token(): #token
+    token = request.headers.get('token')
+    email = get_email_by_token(token)
+    return get_user_messages(token, email)
 
 @app.route('/get_user_messages_by_email')
-def get_user_messages_by_email(token, email):
-    return 'get_user_messages_by_email'
+def get_user_messages_by_email(): #token, email
+    token = request.headers.get('token')
+    email = request.headers.get('email')
+    return get_user_messages(token, email)
 
 @app.route('/post_message')
-def post_message(token, message, email):
-    return 'post_message'      
+def post_message(): #token, message, email
+    token = request.headers.get('token')
+    fromUser = get_email_by_token(token)
+    toUser = request.headers.get('email')
+    message = request.headers.get('message')
+    if token in active_users:
+        database_helper.post_message(toUser, fromUser, message)
+        return json.dumps({"success": "true", "message": "Message posted."})
+    else:
+        return json.dumps({"success": "false", "message": "User is not signed in."})
 
 #################################################
 
 if __name__ == '__main__':
-    conn = database_helper.connect_db()
+    #conn = database_helper.connect_db()
     app.run()
-    database_helper.close_db(conn)
+    #database_helper.close_db(conn)

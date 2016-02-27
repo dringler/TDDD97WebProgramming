@@ -32,8 +32,12 @@ def query_db(query, args=(), one=False):
 	db.commit()
 	return (rv[0] if rv else None) if one else rv
 
-def get_user(email, password):
-	userInfo = query_db('select email,passwordHash,salt from users where email=?', [email], one=True)
+def get_user_mail_pw(email, password):
+	userInfo = query_db('SELECT email,passwordHash,salt FROM users WHERE email=?', [email], one=True)
+	return userInfo
+
+def get_user_info_by_mail(email):
+	userInfo = query_db('SELECT email,fistName,familyName,gender,city,country FROM users WHERE email=?', [email], one=True)
 	return userInfo
 
 def insert_user(email, hashedPassword, salt, firstName, familyName, gender, city, country):
@@ -44,4 +48,14 @@ def user_exists(email):
 		return True
 	else:
 		return False
+
+def get_user_messages_by_email(email):
+	userMessages = query_db('SELECT toUser, fromUser, messageContent FROM messages WHERE toUser=?', [email])
+	return userMessages
+
+def post_message(toUser, fromUser, messageContent):
+	query_db('INSERT INTO messages (toUser,fromUser,messageContent) VALUES (?,?,?)', [toUser,fromUser,messageContent])
+
+
+
 

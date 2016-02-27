@@ -9,3 +9,11 @@ CREATE TABLE users (
 	city TEXT NOT NULL,
 	country TEXT NOT NULL
 );
+
+drop table if exists messages;
+CREATE TABLE messages (
+	msgID INTEGER PRIMARY KEY NOT NULL,
+	toUser TEXT NOT NULL,
+	fromUser TEXT NOT NULL,
+	messageContent TEXT NOT NULL
+);
