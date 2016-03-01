@@ -1,4 +1,4 @@
-import server
+// import server
 
 var welcome;
 var profile;
@@ -47,7 +47,21 @@ function checkLoginInput() {
 function submitLogin() {
 	var username = document.getElementById('loginEmail').value;
 	var password = document.getElementById('loginPassword').value;
-	loginObject = serverstub.signIn(username, password);
+
+
+	// loginObject = serverstub.signIn(username, password);
+	var loginReq = new XMLHttpRequest();
+
+	loginReq.onreadystatechange = function() {
+		if (loginReq.readyState == 4 && loginReq.status == 200) {
+			document.getElementById("testLogin").innerHTML = loginReq.responseText;
+		}
+	}
+	loginReq.open("POST", "/sign_in", true);
+	loginReq.send();
+	
+	
+
 	if (loginObject.success == true) {
 		localStorage.setItem("token", loginObject.data);
 		displayView(profile);

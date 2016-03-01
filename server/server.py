@@ -21,6 +21,11 @@ def hashPw(password):
     hashed_password = hashlib.sha512(password + salt).hexdigest()
     return hashed_password, salt
 
+#get hashed password with salt
+def getHashedPW(password, salt):
+    hashedPassword = hashlib.sha512(password + salt).hexdigest()
+    return hashedPassword
+
 #create unique token
 def get_unique_token():
     token = create_token()
@@ -75,7 +80,7 @@ def teardown_request(exception):
 def hello():
     return 'Hello World!'
 
-@app.route('/sign_in')
+@app.route('/sign_in', methods=['POST'])
 def sign_in(): #email, password
     email = request.form['loginUsernameInput']
     password = request.form['loginPasswordInput']
@@ -85,7 +90,7 @@ def sign_in(): #email, password
     #check is user is found in db
     if userInfo != None:
         #check if password is correct
-        hashedPassword, salt = hashPw(password)
+        hashedPassword = getHashedPW(password, userInfo[2])
         if (hashedPassword == userInfo[1]):
             #get token
             token = get_unique_token()
@@ -97,7 +102,7 @@ def sign_in(): #email, password
     else:
         return json.dumps({"success": "false", "message": "Username not found."})        
 
-@app.route('/sign_up')
+@app.route('/sign_up', methods=['POST'])
 def sign_up(): #email, password, firstname, familyname, gender, city, country
     email = request.form['signupUsernameInput']
     password = request.form['signupPasswordInput']
@@ -116,13 +121,17 @@ def sign_up(): #email, password, firstname, familyname, gender, city, country
         database_helper.insert_user(email, hashedPassword, salt, firstName, familyName, gender, city, country)
         #check if user was corretly inserted into the db
         if (database_helper.user_exists(email) == True):
+            #get token
+            token = get_unique_token()
+            #add token and mail to active users list
+            active_users[token] = email
             return json.dumps({"success": "true", "message": "Sign up successful.", "data": token})
         else:
             return json.dumps({"success": "false", "message": "Inserting the user into the database failed."})
     else:
         return json.dumps({"success": "false", "message": "User already exists."})  
 
-@app.route('/sign_out')
+@app.route('/sign_out', methods=['POST'])
 def sign_out(): #token
     token = request.headers.get('token')
     #delete token/email from active users
@@ -133,7 +142,7 @@ def sign_out(): #token
         return json.dumps({"success": "false", "message": "Not signed in."})  
 
 
-@app.route('/change_password')
+@app.route('/change_password', methods=['POST'])
 def change_password(): #token, old_password, new_password
     token = request.headers.get('token')
     email = get_email_by_token(token)
@@ -142,11 +151,11 @@ def change_password(): #token, old_password, new_password
 
     userInfo = database_helper.get_user_mail_pw(email, oldPW)
     if userInfo != None: #userInfo[0] = email, userInfo[1] = pw, userInfo[2] = salt
-        oldHashedPW, oldSalt = hashPW(oldPW)
+        oldHashedPW = getHashedPW(oldPW, userInfo[2])
         #check old PW
         if (userInfo[1] == oldHashedPW):
-            newHashedPW, newSalt = hashPW(newPW)
-            query_db('UPDATE users SET passwordHash=?, salt=? WHERE email=?', [newHashedPW, newSalt, email])
+            newHashedPW, newSalt = hashPw(newPW)
+            database_helper.query_db('UPDATE users SET passwordHash=?, salt=? WHERE email=?', [newHashedPW, newSalt, email])
             return json.dumps({"success": "true", "message": "Password changed."})
         else:
             return json.dumps({"success": "false", "message": "Incorrect password."})  
@@ -154,36 +163,38 @@ def change_password(): #token, old_password, new_password
     else:
         return json.dumps({"success": "false", "message": "No user found."}) 
 
-@app.route('/get_user_data_by_token')
+@app.route('/get_user_data_by_token', methods=['GET'])
 def get_user_data_by_token(): #token
     token = request.headers.get('token')
     email = get_email_by_token(token)
     return get_user_data(token, email)
     
-@app.route('/get_user_data_by_email')
+@app.route('/get_user_data_by_email', methods=['GET'])
 def get_user_data_by_email(): #token, email
     token = request.headers.get('token')
     email = request.headers.get('email')
     return get_user_data(token, email)  
 
-@app.route('/get_user_messages_by_token')
+@app.route('/get_user_messages_by_token', methods=['GET'])
 def get_user_messages_by_token(): #token
     token = request.headers.get('token')
     email = get_email_by_token(token)
     return get_user_messages(token, email)
 
-@app.route('/get_user_messages_by_email')
+@app.route('/get_user_messages_by_email', methods=['GET'])
 def get_user_messages_by_email(): #token, email
     token = request.headers.get('token')
     email = request.headers.get('email')
     return get_user_messages(token, email)
 
-@app.route('/post_message')
-def post_message(): #token, message, email
+@app.route('/post_message', methods=['POST'])
+def post_message(): #token, message, toEmail
     token = request.headers.get('token')
     fromUser = get_email_by_token(token)
-    toUser = request.headers.get('email')
-    message = request.headers.get('message')
+
+#update form IDs
+    toUser = request.form['searchUserID']
+    message = request.form['postareaBrowse']
     if token in active_users:
         database_helper.post_message(toUser, fromUser, message)
         return json.dumps({"success": "true", "message": "Message posted."})

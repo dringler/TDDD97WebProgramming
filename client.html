@@ -14,18 +14,20 @@
 			</div>
 			<div id="loginAndSignUp">
 				<div id="login"> Login
-					<form>
+					<form class="form-signin" action="/sign_in" method="post" role="form">
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="loginUsernameInput" id="loginEmail" onchange="return checkLoginInput();" required></input>
+							<input type="email" name="loginUsernameInput" id="loginEmail"onchange="return checkLoginInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="loginPasswordInput" id="loginPassword" onchange="return checkLoginInput();" required></input>
+							<input type="password" name="loginPasswordInput" id="loginPassword"
+							 onchange="return checkLoginInput();" required></input>
 						</p>
 						<p id="wrongLoginText" style="display:none;">
 							Wrong input. Please try again.
 						</p>
+						<p id="testLogin">1</p>
 						<p class="loginButton"> 
 							<input type="button" value="Login" id="loginButtonID" onclick="return submitLogin();" /> 
 						</p>

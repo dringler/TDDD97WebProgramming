@@ -12,7 +12,7 @@ CREATE TABLE users (
 
 drop table if exists messages;
 CREATE TABLE messages (
-	msgID INTEGER PRIMARY KEY NOT NULL,
+	msgID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	toUser TEXT NOT NULL,
 	fromUser TEXT NOT NULL,
 	messageContent TEXT NOT NULL
