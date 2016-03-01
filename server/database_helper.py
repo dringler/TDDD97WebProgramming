@@ -43,6 +43,9 @@ def get_user_info_by_mail(email):
 def insert_user(email, hashedPassword, salt, firstName, familyName, gender, city, country):
 	query_db('INSERT INTO users (email,passwordHash,salt,firstName,familyName,gender,city,country) VALUES (?,?,?,?,?,?,?,?)', [email, hashedPassword, salt, firstName, familyName, gender, city, country])
 
+def change_pw(newHashedPW, newSalt, email):
+	query_db('UPDATE users SET passwordHash=?, salt=? WHERE email=?', [newHashedPW, newSalt, email])
+
 def user_exists(email):
 	if (query_db('select email from users where email=?', [email], one=True) != None):
 		return True

@@ -155,7 +155,7 @@ def change_password(): #token, old_password, new_password
         #check old PW
         if (userInfo[1] == oldHashedPW):
             newHashedPW, newSalt = hashPw(newPW)
-            database_helper.query_db('UPDATE users SET passwordHash=?, salt=? WHERE email=?', [newHashedPW, newSalt, email])
+            database_helper.change_pw(newHashedPW, newSalt, email)
             return json.dumps({"success": "true", "message": "Password changed."})
         else:
             return json.dumps({"success": "false", "message": "Incorrect password."})  
@@ -193,8 +193,8 @@ def post_message(): #token, message, toEmail
     fromUser = get_email_by_token(token)
 
 #update form IDs
-    toUser = request.form['searchUserID']
-    message = request.form['postareaBrowse']
+    toUser = request.form['email']
+    message = request.form['message']
     if token in active_users:
         database_helper.post_message(toUser, fromUser, message)
         return json.dumps({"success": "true", "message": "Message posted."})
