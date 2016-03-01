@@ -14,17 +14,22 @@
 			</div>
 			<div id="loginAndSignUp">
 				<div id="login"> Login
-					<form>
+					<form class="form-signin" action="/sign_in" method="post" role="form">
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" id="loginEmail" onchange="return checkLoginInput();" required></input>
+							<input type="email" name="loginUsernameInput" id="loginEmail"onchange="return checkLoginInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="loginPassword" onchange="return checkLoginInput();" required></input>
+							<input type="password" name="loginPasswordInput" id="loginPassword"
+							 onchange="return checkLoginInput();" required></input>
 						</p>
+						<p id="wrongLoginText" style="display:none;">
+							Wrong input. Please try again.
+						</p>
+						<p id="testLogin">1</p>
 						<p class="loginButton"> 
-							<input type="submit" value="Login" id="loginButtonID" onclick="return submitLogin();" disabled /> 
+							<input type="button" value="Login" id="loginButtonID" onclick="return submitLogin();" /> 
 						</p>
 					</form>
 				</div>
@@ -32,11 +37,11 @@
 					<form>
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="usernameInput" id="signUpEmail" onchange="return checkSuInput();" required></input>
+							<input type="email" name="signupUsernameInput" id="signUpEmail" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
-							<input type="password" name="passwordInput" id="signUpPassword" onchange="return checkSuInput();" required></input>
+							<input type="password" name="signupPasswordInput" id="signUpPassword" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="repeatPassword"> Repeat PSW: </label>
@@ -44,15 +49,15 @@
 						</p>
 						<p>
 							<label for="firstName"> First Name: </label>
-							<input type="text" name="firstnameInput" id="signUpFirstName" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupFirstnameInput" id="signUpFirstName" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="lastName"> Last Name: </label>
-							<input type="text" name="lastnameInput" id="signUpLastName" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupLastnameInput" id="signUpLastName" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="gender"> Gender: </label>
-								<select id="signUpGender">
+								<select name ="signupGenderInput" id="signUpGender">
 								  <option value="male">Male</option>
 								  <option value="female">Female</option>
 								</select>
@@ -60,15 +65,23 @@
 						</p>
 						<p>
 							<label for="city"> City: </label>
-							<input type="text" name="lastnameInput" id="signUpCity" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupCityInput" id="signUpCity" onchange="return checkSuInput();" required></input>
 						</p>
 						<p>
 							<label for="country"> Country: </label>
-							<input type="text" name="lastnameInput" id="signUpCountry" onchange="return checkSuInput();" required></input>
+							<input type="text" name="signupCountryInput" id="signUpCountry" onchange="return checkSuInput();" required></input>
 						</p>
-						
+						<p id="pwNotMatch" style="display:none;">
+							Passwords do not match. Minimum password length is 5.
+						</p>
+						<p id="missingFields" style="display:none;">
+							There are missing fields.
+						</p>
+						<p id="suFail" style="display:none;">
+							Something went wrong. Please try again.
+						</p>
 						<p class="signupButton"> 
-							<input type="submit" id="signUpButtonID" value="Sign Up" onclick="return submitSignUp();" disabled/> 
+							<input type="button" id="signUpButtonID" value="Sign Up" onclick="return submitSignUp();"/> 
 						</p>
 					</form>
 
@@ -113,6 +126,9 @@
 					 <label for="email">Search user:</label>
 					    <input type="email" class="form-control" id="searchUserID" name="userSearch" required>
 					  </div>
+					  <p id="searchUserFail" style="display:none;">
+							No user found.
+						</p>
 					 <button type="button" class="btn btn-default"id="searchUserButtonID" onclick="return searchUser()">Search</button>	
 			  	</form>
 
@@ -120,7 +136,6 @@
 			  
 			  	<div id="userWall" style="display: none;">
 			  		<h4 id="userWallHeader"></h4>
-
 			  		<div id="post">
 					<textarea id="postareaBrowse" rows="5" cols="100"> </textarea>
 					<button id="postBrowseButton" onclick="return postButtonBrowse();">Post message</button>
@@ -129,7 +144,6 @@
 			    	<h4>My messages</h4>
 			    	<button id="reloadWallBrowseButton" onclick="return refreshWallBrowse();">Reload</button></br>
 			    	<div id="oWall">
-
 			    	</div>
 			    </div>
 			    <div id="userdata">
@@ -141,9 +155,7 @@
 			    	<div> City: <p id="oCity"> </p></div>
 			    	<div> Country: <p id="oCountry"> </p></div>
 			    </div>
-
-			 	 </div>
-
+			 	</div>
 			  </div>
 
 
@@ -169,8 +181,17 @@
 							<label for="newPassword2"> Repeat new password: </label>
 							<input type="password" name="newPasswordChange2" id="newPasswordChange2ID" onchange="return checkPwChangeInput();" required></input>
 						</p>
+						<p id="pwChangeFail" style="display:none;">
+							Passwords do not match. Minimum password length is 5.
+						</p>
+						<p id="pwWrong" style="display:none;">
+							Something went wrong. Please try again.
+						</p>
+						<p id="pwChangeSucc" style="display:none;">
+							Passwords change was successful.
+						</p>
 						<p class="changePasswordSubmit"> 
-							<input type="submit" id="changePasswordSubmitButton" value="Submit" onclick="return changePasswordSubmit()" disabled/> 
+							<input type="button" id="changePasswordSubmitButton" value="Submit" onclick="return changePasswordSubmit()"/> 
 						</p>
 			    </div>
 			  </div>

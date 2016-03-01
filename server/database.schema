@@ -1,0 +1,19 @@
+drop table if exists users;
+CREATE TABLE users (
+	email TEXT PRIMARY KEY NOT NULL,
+	passwordHash TEXT NOT NULL,
+	salt TEXT NOT NULL,
+	firstName TEXT NOT NULL,
+	familyName TEXT NOT NULL,
+	gender TEXT NOT NULL,
+	city TEXT NOT NULL,
+	country TEXT NOT NULL
+);
+
+drop table if exists messages;
+CREATE TABLE messages (
+	msgID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	toUser TEXT NOT NULL,
+	fromUser TEXT NOT NULL,
+	messageContent TEXT NOT NULL
+);
