@@ -5,7 +5,7 @@ from flask import g
 from contextlib import closing
 
 #configuration
-DATABASE = '/Users/curtis/git/TDDD97WebProgramming/server/database.db'
+DATABASE = '/Users/curtis/git/TDDD97WebProgramming/twidder/twidder/database.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'

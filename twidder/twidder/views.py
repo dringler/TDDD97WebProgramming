@@ -1,13 +1,14 @@
 from flask import app, request, g
 from flask import Flask
+from twidder import app
 import database_helper
 import json
 import hashlib, uuid
 import string
 import random
 
-app = Flask(__name__)
-app.debug = True
+# app = Flask(__name__)
+# app.debug = True
 
 active_users = {}
 
@@ -77,8 +78,8 @@ def teardown_request(exception):
 #################################################
 
 @app.route('/')
-def hello():
-    return 'Hello World!'
+def get_indexPage():
+    return app.send_static_file("client.html")
 
 @app.route('/sign_in', methods=['POST'])
 def sign_in(): #email, password
