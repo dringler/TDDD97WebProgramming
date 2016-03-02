@@ -83,10 +83,10 @@ def get_indexPage():
 
 @app.route('/sign_in', methods=['POST'])
 def sign_in(): #email, password
-    email = request.form['loginUsernameInput']
-    password = request.form['loginPasswordInput']
+    email = request.form['username']
+    password = request.form['password']
     #query user db
-    userInfo = database_helper.get_user_mail_pw(email, password) #userInfo[0] = email, userInfo[1] = pw, userInfo[2] = salt
+    userInfo = database_helper.get_user_mail_pw(email, password) #userInfo[0] = email, userInfo[1] = hashedPw, userInfo[2] = salt
 
     #check is user is found in db
     if userInfo != None:
@@ -105,13 +105,13 @@ def sign_in(): #email, password
 
 @app.route('/sign_up', methods=['POST'])
 def sign_up(): #email, password, firstname, familyname, gender, city, country
-    email = request.form['signupUsernameInput']
-    password = request.form['signupPasswordInput']
-    firstName = request.form['signupFirstnameInput']
-    familyName = request.form['signupLastnameInput'] 
-    gender = request.form['signupGenderInput']
-    city = request.form['signupCityInput']
-    country = request.form['signupCountryInput']
+    email = request.form['username']
+    password = request.form['password']
+    firstName = request.form['firstName']
+    familyName = request.form['familyName'] 
+    gender = request.form['gender']
+    city = request.form['city']
+    country = request.form['country']
 
     #check is user already exists
     userExists = database_helper.user_exists(email)
@@ -132,9 +132,9 @@ def sign_up(): #email, password, firstname, familyname, gender, city, country
     else:
         return json.dumps({"success": "false", "message": "User already exists."})  
 
-@app.route('/sign_out', methods=['POST'])
-def sign_out(): #token
-    token = request.headers.get('token')
+@app.route('/sign_out/<token>', methods=['POST'])
+def sign_out(token): #token
+    #token = request.headers.get('token')
     #delete token/email from active users
     if token in active_users:
         del active_users[token]
@@ -145,10 +145,10 @@ def sign_out(): #token
 
 @app.route('/change_password', methods=['POST'])
 def change_password(): #token, old_password, new_password
-    token = request.headers.get('token')
+    token = request.form['token']
     email = get_email_by_token(token)
-    oldPW = request.form['oldPasswordChange']
-    newPW = request.form['newPasswordChange']
+    oldPW = request.form['oldPassword']
+    newPW = request.form['newPassword']
 
     userInfo = database_helper.get_user_mail_pw(email, oldPW)
     if userInfo != None: #userInfo[0] = email, userInfo[1] = pw, userInfo[2] = salt
@@ -164,37 +164,31 @@ def change_password(): #token, old_password, new_password
     else:
         return json.dumps({"success": "false", "message": "No user found."}) 
 
-@app.route('/get_user_data_by_token', methods=['GET'])
-def get_user_data_by_token(): #token
-    token = request.headers.get('token')
-    email = get_email_by_token(token)
+@app.route('/get_user_data_by_token/<token>', methods=['GET'])
+def get_user_data_by_token(token):
+    email = get_email_by_token(token)    
     return get_user_data(token, email)
     
-@app.route('/get_user_data_by_email', methods=['GET'])
-def get_user_data_by_email(): #token, email
-    token = request.headers.get('token')
-    email = request.headers.get('email')
+@app.route('/get_user_data_by_email/<token>/<email>', methods=['GET'])
+def get_user_data_by_email(token, email):
     return get_user_data(token, email)  
 
-@app.route('/get_user_messages_by_token', methods=['GET'])
-def get_user_messages_by_token(): #token
-    token = request.headers.get('token')
+@app.route('/get_user_messages_by_token/<token>', methods=['GET'])
+def get_user_messages_by_token(token):
     email = get_email_by_token(token)
     return get_user_messages(token, email)
 
-@app.route('/get_user_messages_by_email', methods=['GET'])
-def get_user_messages_by_email(): #token, email
-    token = request.headers.get('token')
-    email = request.headers.get('email')
+@app.route('/get_user_messages_by_email/<token>/<email>', methods=['GET'])
+def get_user_messages_by_email(token, email):
     return get_user_messages(token, email)
 
 @app.route('/post_message', methods=['POST'])
 def post_message(): #token, message, toEmail
-    token = request.headers.get('token')
+    token = request.form['token']
     fromUser = get_email_by_token(token)
 
 #update form IDs
-    toUser = request.form['email']
+    toUser = request.form['toUser']
     message = request.form['message']
     if token in active_users:
         database_helper.post_message(toUser, fromUser, message)
