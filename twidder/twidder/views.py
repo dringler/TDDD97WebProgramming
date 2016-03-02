@@ -186,8 +186,6 @@ def get_user_messages_by_email(token, email):
 def post_message(): #token, message, toEmail
     token = request.form['token']
     fromUser = get_email_by_token(token)
-
-#update form IDs
     toUser = request.form['toUser']
     message = request.form['message']
     if token in active_users:
