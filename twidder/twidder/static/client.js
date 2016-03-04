@@ -17,17 +17,15 @@ window.onload = function(){
 	welcome = document.getElementById("welcomeview");
 	profile = document.getElementById("profileview");
 
-//change later: check if user is already signed in
+//check if user is already signed in
 	token = localStorage.getItem("token");
 	if (token != "" && token != null) {
 		displayView(profile);
 		getUserData();
 		getUserMessages();
-
 	} else {
 		displayView(welcome);	
 	}
-
 };
 
 function checkLoginInput() {
@@ -55,6 +53,7 @@ function submitLogin() {
 			var loginReqData = JSON.parse(loginReq.responseText);
 			if (loginReqData.success == "true") {
 				localStorage.setItem("token", loginReqData.data);
+				connectSocket(username);
 				displayView(profile);
 				getUserData();
 				getUserMessages();
@@ -449,5 +448,27 @@ function searchUser() {
 		}
 	}
 };
+// Web Socket
+function connectSocket(email) {
+    var ws = new WebSocket("ws://localhost:5000/connect_socket");
+
+    ws.onopen = function() {
+        ws.send(email);
+    };
+
+    ws.onmessage = function(response) {
+        if (response.data == "sign_out") {
+            signOut();
+        };
+    };
+
+    ws.onclose = function() {
+        console.log("WebSocket closed");
+    };
+
+    ws.onerror = function() {
+        console.log("WebSocket error!");
+    };
+}
 
 

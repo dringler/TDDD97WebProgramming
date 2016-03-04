@@ -1,6 +1,6 @@
 from flask import app, request, g
 from flask import Flask
-from twidder import app
+from twidder import app, sockets
 import database_helper
 import json
 import hashlib, uuid
@@ -11,6 +11,7 @@ import random
 # app.debug = True
 
 active_users = {}
+active_sockets = {}
 
 #################################################
 # HELPER FUNCTIONS
@@ -74,6 +75,24 @@ def teardown_request(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
+
+#################################################
+## Web Sockets
+#################################################
+
+@app.route('/connect_socket')
+def connect_socket():
+    if request.environ.get("wsgi.websocket"):
+        ws = request.environ["wsgi.websocket"]
+        while True:
+            try:
+                current_email = ws.receive()
+                if current_email in active_sockets:
+                    active_sockets[current_email].send("sign_out")
+                active_sockets[current_email] = ws
+
+            except WebSocketError as e:
+                print(str(e))
 
 #################################################
 
