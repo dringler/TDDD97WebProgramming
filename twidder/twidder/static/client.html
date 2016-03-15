@@ -7,22 +7,31 @@
 		<script src="serverstub.js" type="text/javascript"></script>
 		<script src="js/jquery-1.12.0.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
+		<script src="/js/d3.v3.min.js"></script>
+		<script src="/js/topojson.v1.min.js"></script>
+		<script src="pie.js"></script>
+		<script src="map.js"></script>
+		<script src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/hmac-sha256.js"></script>
+		<script src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/components/enc-base64-min.js"></script>
 		<link rel="stylesheet" href="css/bootstrap.css">
-		<script id="welcomeview" type=”text/view”>
-			<div id="logo">
-				<img src="wimage.png">
+		<link rel="stylesheet" href="css/map.css">
+
+		<script id="welcomeview" type=”text/view”>			
+		<div class="row">
+			<div id="logoID" class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+				<img class="img-responsive" src="wimage.png">
 			</div>
-			<div id="loginAndSignUp">
-				<div id="login"> Login
+			<div id="loginAndSignUpID" class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+				<div id="loginID"> Login
 					<form class="form-signin" action="/sign_in" method="post" role="form">
 						<p>
 							<label for="username"> Email: </label>
-							<input type="email" name="loginUsernameInput" id="loginEmail"onchange="return checkLoginInput();" required></input>
+							<input type="email" name="loginUsernameInput" id="loginEmail"required></input>
 						</p>
 						<p>
 							<label for="password"> Password: </label>
 							<input type="password" name="loginPasswordInput" id="loginPassword"
-							 onchange="return checkLoginInput();" required></input>
+							  required></input>
 						</p>
 						<p id="wrongLoginText" style="display:none;">
 							Wrong input. Please try again.
@@ -32,7 +41,7 @@
 						</p>
 					</form>
 				</div>
-				<div id="signup"> Sign Up
+				<div id="signupID"> Sign Up
 					<form>
 						<p>
 							<label for="username"> Email: </label>
@@ -86,28 +95,33 @@
 
 				</div>
 			</div>
+		</div>
 		</script>
 		<script id="profileview" type=”text/view”>
 			<ul class="nav nav-tabs">
-			  <li class="active" id="hometab"><a data-toggle="tab" href="#home">Home</a></li>
-			  <li id="browsetab"><a data-toggle="tab" href="#browse">Browse</a></li>
-			  <li id="accounttab"><a data-toggle="tab" href="#account">Account</a></li>
+			  <li class="active" id="hometab"><a data-toggle="tab" href="#home" data-toggle="tab">Home</a></li>
+			  <li id="browsetab"><a data-toggle="tab" href="#browse" data-toggle="tab">Browse</a></li>
+			  <li id="livedatatab"><a data-toggle="tab" href="#livedata" data-toggle="tab">Live Data</a></li>
+			  <li id="accounttab"><a data-toggle="tab" href="#account" data-toggle="tab">Account</a></li>
 			</ul>
 
 			<div class="tab-content">
 			  <div id="home" class="tab-pane fade in active">
-			    <div id="post">
-					<textarea id="postarea" rows="5" cols="100"></textarea>
+			  <div class="row">
+			    <div id="post" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<textarea class="form-control" id="postarea" rows="5"></textarea>
 					<button id="homePostButton" onclick="return postButton();">Post message</button>
 			    </div>
-			    <div id="wallheader">
+			    </div>
+			    <div class="row">
+			    <div id="wallheader" class="col-sm-12 col-md-6 col-lg-6">
 			    	<h4>My messages</h4>
 			    	<button id="homeReloadWallButton" onclick="return refreshWall();">Reload</button></br>
-			    	<div id="wall">
-
+			    	
+			    	<div id="wall" class="col-sm-12">
 			    	</div>
 			    </div>
-			    <div id="userdata">
+			    <div id="userdata" class="col-sm-12 col-md-6 col-lg-6">
 			    <h4>My data</h4>
 			    	<div> Username: <p id="mdUsername"> </p></div>
 			    	<div> First Name: <p id="mdFirstName"> </p></div>
@@ -117,46 +131,72 @@
 			    	<div> Country: <p id="mdCountry"> </p></div>
 			    </div>
 			 </div>
+			 </div>
 
 
-			 <div id="browse" class="tab-pane fade">			 
-			  	<form role="form">
+			 <div id="browse" class="tab-pane fade">
+			 	<div class="row">
+			 	<form role="form">
 					<div class="form-group">
-					 <label for="email">Search user:</label>
-					    <input type="email" class="form-control" id="searchUserID" name="userSearch" required>
-					  </div>
-					  <p id="searchUserFail" style="display:none;">
+					 	<label class="control-label col-sm-12 text-center" for="email">Search user:</label>
+					 	<div class="col-sm-12 col-md-12 col-lg-12">
+					    	<input type="email" class="form-control" id="searchUserID" name="userSearch" required>
+					    </div>
+					</div>
+			
+					<p class="collapse" id="searchUserFail" >
 							No user found.
-						</p>
-					 <button type="button" class="btn btn-default"id="searchUserButtonID" onclick="return searchUser()">Search</button>	
+					</p>
+					<div class="col-sm-12 col-md-12 col-lg-12">
+					<button type="button" class="btn btn-default"id="searchUserButtonID" onclick="return searchUser()">Search</button>	
+					</div>
 			  	</form>
+			  	</div>
 
 			    
-			  
-			  	<div id="userWall" style="display: none;">
-			  		<h4 id="userWallHeader"></h4>
-			  		<div id="post">
-					<textarea id="postareaBrowse" rows="5" cols="100"></textarea>
-					<button id="postBrowseButton" onclick="return postButtonBrowse();">Post message</button>
-			    </div>
-			    <div id="wallheader">
-			    	<h4>My messages</h4>
-			    	<button id="reloadWallBrowseButton" onclick="return refreshWallBrowse();">Reload</button></br>
-			    	<div id="oWall">
-			    	</div>
-			    </div>
-			    <div id="userdata">
-			    	<h4>Userdata</h4>
-			    	<div> Username: <p id="oUsername"> </p></div>
-			    	<div> First Name: <p id="oFirstName"> </p></div>
-			    	<div> Last Name: <p id="oLastName"> </p></div>
-			    	<div> Gender: <p id="oGender"> </p></div>
-			    	<div> City: <p id="oCity"> </p></div>
-			    	<div> Country: <p id="oCountry"> </p></div>
-			    </div>
-			 	</div>
+			  	<div class="row">
+			  		<div id="userWall" style="display: none;" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			  			<h4 id="userWallHeader"></h4>
+			  			<div id="post" class="col-sm-12 col-md-12 col-lg-12">
+							<textarea id="postareaBrowse" rows="5" cols="100"></textarea>
+							<button id="postBrowseButton" onclick="return postButtonBrowse();">Post message</button>
+			    		</div>
+			    		<div id="wallheader" class="col-sm-12 col-md-6 col-lg-6">
+			    			<h4>My messages</h4>
+			    				<button id="reloadWallBrowseButton" onclick="return refreshWallBrowse();">Reload</button></br>
+			    			<div id="oWall" class="col-sm-12">
+			    			</div>
+			    		</div>
+			    		<div id="userdata" class="col-sm-12 col-md-6 col-lg-6">
+					    	<h4>Userdata</h4>
+					    	<div> Username: <p id="oUsername"> </p></div>
+					    	<div> First Name: <p id="oFirstName"> </p></div>
+					    	<div> Last Name: <p id="oLastName"> </p></div>
+					    	<div> Gender: <p id="oGender"> </p></div>
+					    	<div> City: <p id="oCity"> </p></div>
+					    	<div> Country: <p id="oCountry"> </p></div>
+			    		</div>
+			 		</div>
+			  	</div>
 			  </div>
 
+			  
+			  <div id="livedata" class="tab-pane fade">
+			    <div id="pieChartsRowID" class="row">
+			    	<div class="col-sm-6" id="numberOfPostsChartID" style="height: 40vh">
+			    	<h4 class="text-center">Posts on my Page</h4>
+			    	</div>
+			    	<div class="col-sm-6" id="currentUsersOnlineChartID" style="height: 40vh">
+			    		<h4 class="text-center">Number of current online users</h4>
+
+			    	</div>
+			    </div>
+			    <div id="mapRowID" class="row">
+			    	<div class="col-sm-12" id="mapChartID" style="height: 70vh">
+			    	<h4 class="text-center">User distribution</h4>
+			    	</div>
+			    </div>
+			 </div>
 
 			  <div id="account" class="tab-pane fade">
 			    <p></p>
@@ -201,3 +241,12 @@
 		<div id="body"></div>
 	</body>
 </html>
+<script>
+	$(document).on( 'shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+   				//console.log(e.target)
+   				if(e.target.innerHTML == "Live Data") {
+   					initLiveData();
+   				}
+
+			})
+</script>

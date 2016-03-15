@@ -6,16 +6,35 @@ import json
 import hashlib, uuid
 import string
 import random
+import hmac
+import base64
 
-# app = Flask(__name__)
-# app.debug = True
 
 active_users = {}
 active_sockets = {}
 
+privateKey = "myprivatekey";
+
 #################################################
 # HELPER FUNCTIONS
 #################################################
+
+
+#test function for getting the hash
+@app.route('/get_HMAC/<username>/<password>', methods=['GET'])
+def get_HMAC(username, password):
+    hashString = username+password
+    hashedString = hashHMAC(hashString)
+    
+    jsonString = {'hashedString': hashedString}
+    return json.dumps({"success": "true", "message": "Data returned.", "data": jsonString})
+
+#hash function for checking the validity of the user
+def hashHMAC(stringToHash):
+    message = bytes(stringToHash).encode('utf-8')
+    secret = bytes(privateKey).encode('utf-8')
+    signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
+    return signature
 
 #hash password
 def hashPw(password):
@@ -66,10 +85,12 @@ def get_user_messages(token, email):
 
 #################################################
 
+#init database connection
 @app.before_request
 def before_request():
     conn  = database_helper.connect_db()
 
+#close database connection
 @app.teardown_request
 def teardown_request(exception):
     db = getattr(g, '_database', None)
@@ -80,6 +101,7 @@ def teardown_request(exception):
 ## Web Sockets
 #################################################
 
+#connect web socket
 @app.route('/connect_socket')
 def connect_socket():
     if request.environ.get("wsgi.websocket"):
@@ -88,9 +110,9 @@ def connect_socket():
             try:
                 current_email = ws.receive()
                 if current_email in active_sockets:
+                    #close old session
                     active_sockets[current_email].send("sign_out")
                 active_sockets[current_email] = ws
-
             except WebSocketError as e:
                 print(str(e))
 
@@ -100,28 +122,38 @@ def connect_socket():
 def get_indexPage():
     return app.send_static_file("client.html")
 
+#sign-in request
 @app.route('/sign_in', methods=['POST'])
 def sign_in(): #email, password
     email = request.form['username']
     password = request.form['password']
-    #query user db
-    userInfo = database_helper.get_user_mail_pw(email, password) #userInfo[0] = email, userInfo[1] = hashedPw, userInfo[2] = salt
+    hashedServerRequest = request.form['hashedServerRequest']
 
-    #check is user is found in db
-    if userInfo != None:
-        #check if password is correct
-        hashedPassword = getHashedPW(password, userInfo[2])
-        if (hashedPassword == userInfo[1]):
-            #get token
-            token = get_unique_token()
-            #add token and mail to active users list
-            active_users[token] = email
-            return json.dumps({"success": "true", "message": "Sign in successful.", "data": token})    
+    #check client request
+    combinedUserData = email+password
+    hashedRequestData = hashHMAC(combinedUserData)
+    if (hashedServerRequest == hashedRequestData):
+        #query user db
+        userInfo = database_helper.get_user_mail_pw(email, password) #userInfo[0] = email, userInfo[1] = hashedPw, userInfo[2] = salt
+
+        #check is user is found in db
+        if userInfo != None:
+            #check if password is correct
+            hashedPassword = getHashedPW(password, userInfo[2])
+            if (hashedPassword == userInfo[1]):
+                #get token
+                token = get_unique_token()
+                #add token and mail to active users list
+                active_users[token] = email
+                return json.dumps({"success": "true", "message": "Sign in successful.", "data": token})    
+            else:
+                return json.dumps({"success": "false", "message": "Invalid password."})
         else:
-            return json.dumps({"success": "false", "message": "Invalid password."})
+            return json.dumps({"success": "false", "message": "Username not found."})        
     else:
-        return json.dumps({"success": "false", "message": "Username not found."})        
+        return json.dumps({"success": "false", "message": "Hashed server request is wrong."})        
 
+#sign-up request
 @app.route('/sign_up', methods=['POST'])
 def sign_up(): #email, password, firstname, familyname, gender, city, country
     email = request.form['username']
@@ -151,6 +183,7 @@ def sign_up(): #email, password, firstname, familyname, gender, city, country
     else:
         return json.dumps({"success": "false", "message": "User already exists."})  
 
+#sign-out request
 @app.route('/sign_out/<token>', methods=['POST'])
 def sign_out(token): #token
     #token = request.headers.get('token')
@@ -161,7 +194,7 @@ def sign_out(token): #token
     else:
         return json.dumps({"success": "false", "message": "Not signed in."})  
 
-
+#change password request
 @app.route('/change_password', methods=['POST'])
 def change_password(): #token, old_password, new_password
     token = request.form['token']
@@ -183,24 +216,29 @@ def change_password(): #token, old_password, new_password
     else:
         return json.dumps({"success": "false", "message": "No user found."}) 
 
+#get user data by token
 @app.route('/get_user_data_by_token/<token>', methods=['GET'])
 def get_user_data_by_token(token):
     email = get_email_by_token(token)    
     return get_user_data(token, email)
-    
+
+#get user data by email    
 @app.route('/get_user_data_by_email/<token>/<email>', methods=['GET'])
 def get_user_data_by_email(token, email):
     return get_user_data(token, email)  
 
+#get user messages by token
 @app.route('/get_user_messages_by_token/<token>', methods=['GET'])
 def get_user_messages_by_token(token):
     email = get_email_by_token(token)
     return get_user_messages(token, email)
 
+#get user messages by email
 @app.route('/get_user_messages_by_email/<token>/<email>', methods=['GET'])
 def get_user_messages_by_email(token, email):
     return get_user_messages(token, email)
 
+#post message request
 @app.route('/post_message', methods=['POST'])
 def post_message(): #token, message, toEmail
     token = request.form['token']
@@ -213,9 +251,20 @@ def post_message(): #token, message, toEmail
     else:
         return json.dumps({"success": "false", "message": "User is not signed in."})
 
+#get number of current online users
+@app.route('/get_live_data/<token>', methods=['GET'])
+def get_live_data(token):
+    email = get_email_by_token(token)
+    curr_online_users = len(active_users)
+    total_users_array = database_helper.get_count_users()
+    total_user_messages_array = database_helper.get_count_user_messages(email)
+    user_countries_array = database_helper.get_user_countries()
+
+    jsonString = {'curr_online_users': curr_online_users, 'total_users': total_users_array[0][0], 'total_user_messages': total_user_messages_array, 'user_countries': user_countries_array}
+    return json.dumps({"success": "true", "message": "Data returned.", "data": jsonString})
+
 #################################################
 
+#main method
 if __name__ == '__main__':
-    #conn = database_helper.connect_db()
     app.run()
-    #database_helper.close_db(conn)

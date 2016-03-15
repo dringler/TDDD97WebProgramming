@@ -1,6 +1,3 @@
-# from twidder import app
-# app.run(debug=True)
-
 from gevent.wsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 from geventwebsocket import WebSocketServer, WebSocketError
