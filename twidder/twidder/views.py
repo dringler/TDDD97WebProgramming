@@ -163,11 +163,6 @@ def sign_up(): #email, password, firstname, familyname, gender, city, country
         database_helper.insert_user(email, hashedPassword, salt, firstName, familyName, gender, city, country)
         #check if user was corretly inserted into the db
         if (database_helper.user_exists(email) == True):
-            #get token
-            token = get_unique_token()
-            #add token and mail to active users list
-            #active_users[token] = email
-            #active_users[email] = token
             return json.dumps({"success": "true", "message": "Sign up successful.", "data": token})
         else:
             return json.dumps({"success": "false", "message": "Inserting the user into the database failed."})
