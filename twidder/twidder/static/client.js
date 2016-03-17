@@ -4,6 +4,7 @@ var profile; //shows the user page
 
 //token
 var token = "";
+var gUsername = "";
 
 //global password parameters
 var minPwLength = 5;
@@ -40,11 +41,6 @@ window.onload = function(){
 	}
 };
 
-//
-// function checkLoginInput() {
-// 	var loginEmail = document.getElementById('loginEmail').value;
-// 	var loginPassword = document.getElementById('loginPassword').value;
-// };
 
 /**
  * hash function to hash the username and password
@@ -58,6 +54,16 @@ function hashFunction(username, password) {
   	var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);
   	return hashInBase64;
 }
+/**
+ * hash function to hash a string
+ * @param {String} stringToHash
+ * @return {String} hashedCombination
+ */
+function reqHashFunction(stringToHash) {
+	var hash = CryptoJS.HmacSHA256(stringToHash, privateKey);
+  	var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);
+  	return hashInBase64;
+}
 
 /**
  * submit the login when Login-Button is pressed
@@ -68,19 +74,6 @@ function submitLogin() {
 
 	//hash username and password
 	var hashedServerRequest = hashFunction(username, password);
-
-	//FUNCTION TO CHECK IF SERVER CREATES THE SAME HASH OUT OF THE VARIABLES
-	// var pwReq = new XMLHttpRequest();
-	// pwReq.open("GET", "get_HMAC/" + username + "/"+ password, true);
-	// pwReq.send();
-
-	// pwReq.onreadystatechange = function() {
-	// 	if (pwReq.readyState == 4 && pwReq.status == 200) {
-	// 		var pwReqData = JSON.parse(pwReq.responseText);
-	// 		console.log("SERVER RESPONSE pwReqData");
-	// 		console.log(pwReqData);
-	// 	}
-	// }
 
 	//create formData object
 	var loginFormData = new FormData();
@@ -106,6 +99,7 @@ function submitLogin() {
 			if (loginReqData.success == "true") {
 				//save token to local storage
 				localStorage.setItem("token", loginReqData.data);
+				localStorage.setItem("username", username);
 				connectSocket(username); //new socket connection
 				displayView(profile);
 				getUserData();
@@ -173,26 +167,30 @@ function submitSignUp() {
 		signupFormData.append("city", city);
 		signupFormData.append("country", country);
 
+
+		//hash username and password
+		var hashedServerRequest = hashFunction(username, password);
 		//create formData object
 		var loginFormData = new FormData();
 		loginFormData.append("username", username);
 		loginFormData.append("password", password);
+		loginFormData.append("hashedServerRequest", hashedServerRequest);
 
 		//create and send signup XMLHttpRequest object
 		var signupReq = new XMLHttpRequest();
 		signupReq.open("POST", "/sign_up", true);
 		signupReq.send(signupFormData);
 
-		//create and send login XMLHttpRequest object
-		var loginReq = new XMLHttpRequest();
-		loginReq.open("POST", "/sign_in", true);
-		loginReq.send(loginFormData);
-
 		signupReq.onreadystatechange = function() {
 			if (signupReq.readyState == 4 && signupReq.status == 200) {
 				//signupReq is successful
 				//parse text of signupRequest object
 				var signupReqData = JSON.parse(signupReq.responseText);
+
+				//create and send login XMLHttpRequest object
+				var loginReq = new XMLHttpRequest();
+				loginReq.open("POST", "/sign_in", true);
+				loginReq.send(loginFormData);
 
 				loginReq.onreadystatechange = function() {
 					if (loginReq.readyState == 4 && loginReq.status == 200) {
@@ -202,8 +200,10 @@ function submitSignUp() {
 
 						//if both request objects are successfully returned
 						if (signupReqData.success == "true" && loginReqData.success == "true") {
-							localStorage.setItem("token", loginReqData.data); //save token to local storage
-							displayView(profile); //display user page
+							localStorage.setItem("token", loginReqData.data);
+							localStorage.setItem("username", username);
+							connectSocket(username); //new socket connection
+							displayView(profile);
 							getUserData();
 							getUserMessages();
 						} else {
@@ -226,17 +226,29 @@ function submitSignUp() {
 function signOut() {
 	//get tokem from local storage
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
+	// assemble string to hash
+	var stringToHash = token + gUsername + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
+
+	// create form object
+	var signoutFormData = new FormData();
+	signoutFormData.append("username", gUsername);
+	signoutFormData.append("uHash", uHash);
 
 	//new XMLHttpRequest object
 	var signoutReq = new XMLHttpRequest();
 	//get user data (send token to get request)
-	signoutReq.open("POST", "/sign_out/"+token, true);
-	signoutReq.send();
+	signoutReq.open("POST", "/sign_out", true);
+	// signoutReq.open("GET", "/get_HMAC/"+gUsername+"/"+reqHash, true);
+	signoutReq.send(signoutFormData);
 	//wait for request answer
 	signoutReq.onreadystatechange = function() {
 		if (signoutReq.readyState == 4 && signoutReq.status == 200) {
-			//delete token from local storage
+			//delete token and username from local storage
 			localStorage.setItem("token", "");
+			localStorage.setItem("username", "");
 			displayView(welcome); //display welcome page
 		}
 	}
@@ -296,12 +308,19 @@ function changePasswordSubmit() {
 	//check user input
 	if (pwChangeOk == true) {
 		token = localStorage.getItem("token");
+		gUsername = localStorage.getItem("username");
 		var oldPW = document.getElementById('oldPasswordChangeID').value;
 		var newPW = document.getElementById('newPasswordChangeID').value;
 		
+		//assemble all fields
+		var stringToHash = token + gUsername + oldPW + newPW + privateKey;
+		//hash function
+		var uHash = reqHashFunction(stringToHash);
+
 		//create formData object
 		var pwFormData = new FormData();
-		pwFormData.append("token", token)
+		pwFormData.append("uHash", uHash);
+		pwFormData.append("username", gUsername);
 		pwFormData.append("oldPassword", oldPW);
 		pwFormData.append("newPassword", newPW);
 		
@@ -345,11 +364,17 @@ function changePasswordSubmit() {
 function getUserData() {
 		//get tokem from local storage
 		token = localStorage.getItem("token");
+		gUsername = localStorage.getItem("username");
+
+		// assemble string to hash
+		var stringToHash = token + gUsername + privateKey;
+		//create hash out of email and token
+		var uHash = reqHashFunction(stringToHash);
 
 		//new XMLHttpRequest object
 		var getUserDataReq = new XMLHttpRequest();
 		//get user data (send token to get request)
-		getUserDataReq.open("GET", "/get_user_data_by_token/"+token, true);
+		getUserDataReq.open("GET", "/get_user_data_by_token/"+gUsername+"/"+uHash, true);
 		getUserDataReq.send();
 
 		getUserDataReq.onreadystatechange = function() {
@@ -372,11 +397,17 @@ function getUserData() {
  */
 function getUserMessages() {
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
+
+	// assemble string to hash
+	var stringToHash = token + gUsername + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
 
 	//new XMLHttpRequest object
 	var getUserMsgReq = new XMLHttpRequest();
 	//get user data (send token to get request)
-	getUserMsgReq.open("GET", "/get_user_messages_by_token/"+token, true);
+	getUserMsgReq.open("GET", "/get_user_messages_by_token/"+gUsername+"/"+uHash, true);
 	getUserMsgReq.send();
 
 	getUserMsgReq.onreadystatechange = function() {
@@ -404,12 +435,19 @@ function getUserMessages() {
  * @param {String} wallid: ElementID of the wall (home or browse page)
  */
 function getUserMessagesByMail(mail, wallid) {
-	var email = mail;
+	var fromEmail = mail;
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
+
+	// assemble string to hash
+	var stringToHash = token + gUsername + fromEmail + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
+
 	//new XMLHttpRequest object
 	var getUserMsgReq = new XMLHttpRequest();
 	//get user data (send token to get request)
-	getUserMsgReq.open("GET", "/get_user_messages_by_email/"+token+"/"+email, true);
+	getUserMsgReq.open("GET", "/get_user_messages_by_email/"+gUsername+"/"+fromEmail+"/"+uHash, true);
 	getUserMsgReq.send();
 
 	getUserMsgReq.onreadystatechange = function() {
@@ -439,14 +477,19 @@ function getUserMessagesByMail(mail, wallid) {
  */
 function postButton() {
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
 	var message = document.getElementById('postarea').value;
-	var email = "";
+	//var email = "";
 
-	//get email from user
+	// assemble string to hash
+	var stringToHash = token + gUsername + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
+
 	//new XMLHttpRequest object
 	var getUserDataReq = new XMLHttpRequest();
 	//get user data (send token to get request)
-	getUserDataReq.open("GET", "/get_user_data_by_token/"+token, true);
+	getUserDataReq.open("GET", "/get_user_data_by_token/"+gUsername+"/"+uHash, true);
 	getUserDataReq.send();
 
 	getUserDataReq.onreadystatechange = function() {
@@ -455,12 +498,19 @@ function postButton() {
 			var returnObject = JSON.parse(getUserDataReq.responseText);
 			//display user information
 			if (returnObject.success == "true") {
-				email = returnObject.data.email;
+				//email = returnObject.data.email;
+
+				// assemble string to hash
+				var stringToHash = token + gUsername + gUsername + message + privateKey;
+				//create hash out of email and token
+				var uHash = reqHashFunction(stringToHash);
+
 				//create formData object
 				var postFormData = new FormData();
-				postFormData.append("token", token);
+				postFormData.append("uHash", uHash);
 				postFormData.append("message", message);
-				postFormData.append("toUser", email);
+				postFormData.append("toUser", gUsername);
+				postFormData.append("fromUser", gUsername);
 				
 				//new XMLHttpRequest object
 				var postReq = new XMLHttpRequest();
@@ -496,14 +546,21 @@ function refreshWall() {
  */
 function postButtonBrowse() {
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
 	var message = document.getElementById('postareaBrowse').value;
-	var email = document.getElementById('searchUserID').value;
+	var toUser = document.getElementById('searchUserID').value;
+
+	// assemble string to hash
+	var stringToHash = token + gUsername + toUser + message + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
 
 	//create formData object
 	var postFormData = new FormData();
-	postFormData.append("token", token);
+	postFormData.append("uHash", uHash);
 	postFormData.append("message", message);
-	postFormData.append("toUser", email);
+	postFormData.append("toUser", toUser);
+	postFormData.append("fromUser", gUsername)
 				
 	//new XMLHttpRequest object
 	var postReq = new XMLHttpRequest();
@@ -535,12 +592,18 @@ function refreshWallBrowse() {
  */
 function searchUser() {	
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
 	var email = document.getElementById('searchUserID').value;
+
+	// assemble string to hash
+	var stringToHash = token + gUsername + email + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
 
 	//new XMLHttpRequest object 
 	var getUserDataReq = new XMLHttpRequest();
 	//get user data (send token to get request)
-	getUserDataReq.open("GET", "/get_user_data_by_email/"+token+"/"+email, true);
+	getUserDataReq.open("GET", "/get_user_data_by_email/"+gUsername+"/"+email+"/"+uHash, true);
 	getUserDataReq.send();
 
 	getUserDataReq.onreadystatechange = function() {
@@ -593,12 +656,18 @@ var nMap;
 function initLiveData() {
 
 	token = localStorage.getItem("token");
+	gUsername = localStorage.getItem("username");
+
+	// assemble string to hash
+	var stringToHash = token + gUsername + privateKey;
+	//create hash out of email and token
+	var uHash = reqHashFunction(stringToHash);
 
 	//new XMLHttpRequest object 
 	var getLiveDataReq = new XMLHttpRequest();
 	//get user data (send token to get request)
 	// getLiveDataReq.open("GET", "/get_live_data", true);
-	getLiveDataReq.open("GET", "/get_live_data/"+token, true);
+	getLiveDataReq.open("GET", "/get_live_data/"+gUsername+"/"+uHash, true);
 	getLiveDataReq.send();
 
 	getLiveDataReq.onreadystatechange = function() {
